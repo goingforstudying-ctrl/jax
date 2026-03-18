@@ -322,6 +322,7 @@ class PallasSm90ATest(PallasTest, jtu.CudaArchSpecificTest):
     super().setUp(artificial_shared_memory_limit=None)
 
 
+
 class PallasTCGen05Test(PallasTest, jtu.CudaArchSpecificTest):
 
   def setUp(self):
@@ -3711,8 +3712,9 @@ class PallasCallTest(PallasTest, jtu.CudaArchSpecificTest):
     )(inp)
     np.testing.assert_array_equal(result, x + y)
 
+  @parameterized.parameters(False, True)
   @jtu.thread_unsafe_test()  # Modifies ``os.environ``.
-  def test_griddepcontrol(self):
+  def test_griddepcontrol(self, programmatic_serialization):
     @jax.jit
     def f(x):
       def kernel_body(x_ref, o_ref):
@@ -3723,6 +3725,8 @@ class PallasCallTest(PallasTest, jtu.CudaArchSpecificTest):
       return self.kernel(
           kernel_body,
           out_type=jax.ShapeDtypeStruct(x.shape, x.dtype),
+          compiler_params=plgpu.CompilerParams(
+              programmatic_serialization=programmatic_serialization),
       )(x)
 
     x = jnp.arange(128).astype(jnp.float32)
@@ -3735,6 +3739,35 @@ class PallasCallTest(PallasTest, jtu.CudaArchSpecificTest):
     ptx_output = ptx()
     self.assertIn("griddepcontrol.wait;", ptx_output)
     self.assertIn("griddepcontrol.launch_dependents;", ptx_output)
+
+  def test_griddepcontrol_multi_kernel(self):
+    # Tests that we can launch two kernels that communicate via griddepcontrol.
+    @jax.jit
+    def f(x):
+      def kernel_a(x_ref, out_ref):
+        out_ref[...] = x_ref[...] + 1.0
+        plgpu.griddepcontrol_launch_dependents()
+
+      def kernel_b(in_ref, out_ref):
+        plgpu.griddepcontrol_wait()
+        out_ref[...] = in_ref[...] * 2.0
+
+      intermediate = self.kernel(
+          kernel_a,
+          out_type=jax.ShapeDtypeStruct(x.shape, x.dtype),
+          compiler_params=plgpu.CompilerParams(
+              programmatic_serialization=True),
+      )(x)
+      return self.kernel(
+          kernel_b,
+          out_type=jax.ShapeDtypeStruct(x.shape, x.dtype),
+          compiler_params=plgpu.CompilerParams(
+              programmatic_serialization=True),
+      )(intermediate)
+
+    x = jnp.arange(128).astype(jnp.float32)
+    out = f(x)
+    np.testing.assert_allclose(out, (x + 1.0) * 2.0)
 
 
 class PallasCallWarpPrimitiveSemanticsTest(PallasTest):
@@ -4091,6 +4124,7 @@ class PallasCallWGTest(
     expected_missing_primitives = set()
 
     self.assertSetEqual(actual_missing_primitives, expected_missing_primitives)
+
 
 
 class PallasCallSm90ATest(PallasSm90ATest):

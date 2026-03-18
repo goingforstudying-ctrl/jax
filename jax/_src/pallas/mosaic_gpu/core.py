@@ -123,6 +123,11 @@ class CompilerParams:
       events than this.
     profile_dir: The directory to which profiling traces will be written to.
     profile_trace_scope: The scope at which traces are collected (WARP or WARPGROUP).
+    lowering_semantics: The lowering semantics to use for the kernel. Defaults
+      to `LoweringSemantics.Lane`.
+    programmatic_serialization: If True, the kernel will be launched with the
+      CUDA launch attribute for programmatic stream serialization. This is
+      required for PDL support. Defaults to False.
   """
   approx_math: bool = False
   dimension_semantics: Sequence[DimensionSemantics] | None = None
@@ -133,6 +138,7 @@ class CompilerParams:
   profile_dir: str = ""
   profile_trace_scope: TraceScope = TraceScope.WARPGROUP
   lowering_semantics: mgpu.core.LoweringSemantics = mgpu.core.LoweringSemantics.Lane
+  programmatic_serialization: bool = False
 
   def __post_init__(self):
     if self.dimension_semantics is not None:

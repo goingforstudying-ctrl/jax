@@ -1124,6 +1124,7 @@ def lower_jaxpr_to_module(
       prof_spec=prof_spec,
       jax_mesh=jax_mesh,
       base_loc=base_loc,
+      programmatic_serialization=params.programmatic_serialization,
   )
 
   if lowering_semantics == mgpu.LoweringSemantics.Warpgroup:
