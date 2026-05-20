@@ -407,6 +407,23 @@ class VectorSubcoreTest(PallasSCTest):
     x = jnp.arange(100)
     np.testing.assert_array_equal(kernel(x), x)
 
+  def test_store_mask_logic_with_offset(self):
+    self.skip_if_tc_tiling()
+
+    @self.vector_subcore_kernel(
+        out_shape=jax.ShapeDtypeStruct(shape=(100,), dtype=jnp.int32)
+    )
+    def kernel(x_ref, o_ref):
+      o_ref[...] = jnp.zeros_like(o_ref)
+      sliced_o = o_ref.at[1:100]
+      sliced_x = x_ref.at[0:99]
+      sliced_o[...] = sliced_x[...]
+
+    x = jnp.arange(100) + 10
+    res = kernel(x)
+    self.assertEqual(res[0], 0)
+    np.testing.assert_array_equal(res[1:100], x[0:99])
+
   @parameterized.product(major_dim=[2, 3, 4])
   def test_get_index(self, major_dim):
     @self.vector_subcore_kernel(

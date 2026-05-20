@@ -1512,6 +1512,7 @@ jax_multiplatform_test(
             [],
             google_value = [
                 "--xla_tpu_enable_mlir_verifier=ALL",
+                "--xla_sc_assert_level=san",
             ],
         ),
     },
@@ -1546,6 +1547,7 @@ jax_multiplatform_test(
         [],
         google_value = [
             "--xla_tpu_enable_mlir_verifier=ALL",
+            "--xla_sc_assert_level=san",
             "--xla_msa_enable=false",
             "--xla_tpu_vmem_scavenging_mode=NONE",
             "--xla_mosaic_unsafe_allow_multicore_remote_dma=true",
@@ -1577,6 +1579,7 @@ jax_multiplatform_test(
             [],
             google_value = [
                 "--xla_tpu_enable_mlir_verifier=ALL",
+                "--xla_sc_assert_level=san",
             ],
         ),
     },
@@ -1607,6 +1610,7 @@ jax_multiplatform_test(
         [],
         google_value = [
             "--xla_tpu_enable_mlir_verifier=ALL",
+            "--xla_sc_assert_level=san",
         ],
     ),
     config_tags_overrides = {
@@ -1687,6 +1691,7 @@ jax_multiplatform_test(
         [],
         google_value = [
             "--xla_tpu_enable_mlir_verifier=ALL",
+            "--xla_sc_assert_level=san",
         ],
     ),
     enable_backends = ["tpu"],
