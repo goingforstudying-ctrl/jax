@@ -15,6 +15,7 @@
 import collections
 import contextlib
 import functools
+import gc
 import logging
 import time
 import unittest
@@ -28,6 +29,7 @@ from jax._src import core
 from jax._src import dispatch
 from jax._src import test_util as jtu
 from jax._src import util
+from jax._src.lib import xla_client
 from jax.experimental import io_callback
 from jax.experimental import pjit
 from jax._src.shard_map import shard_map
@@ -1474,6 +1476,32 @@ class IOCallbackTest(jtu.JaxTestCase):
 
     jax.vmap(f)(jnp.arange(3.))  # don't crash
     jax.effects_barrier()
+
+  def test_create_hlo_output_callback(self):
+    client = xla_client.make_cpu_client(asynchronous=False)
+    if not hasattr(client, "create_hlo_output_callback"):
+      raise unittest.SkipTest("create_hlo_output_callback not yet available in jaxlib")
+    lowered = jax.jit(lambda x: x).lower(1)
+    module = lowered.compiler_ir()
+
+    received_args = []
+    def my_callback(replica_id, partition_id, args):
+      received_args.append((replica_id, partition_id, args))
+
+    capsule = client.create_hlo_output_callback(123, 2, my_callback)
+    self.assertIsNotNone(capsule)
+
+    executable = client.compile_and_load(
+        module,
+        xla_client.DeviceList(tuple(client.devices())),
+        compile_options=xla_client.CompileOptions(),
+        host_callbacks=[capsule],
+    )
+    self.assertIsNotNone(executable)
+
+    del executable
+    del capsule
+    gc.collect()
 
 
 if __name__ == "__main__":
