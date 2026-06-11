@@ -1125,6 +1125,15 @@ export_ignore_forward_compatibility = bool_state(
     )
 )
 
+export_ignore_custom_call_safety_checks = bool_state(
+    name='jax_export_ignore_custom_call_safety_checks',
+    default=bool_env('JAX_EXPORT_IGNORE_CUSTOM_CALL_SAFETY_CHECKS', False),
+    help=(
+        'Whether to ignore the custom call compatibility safety checks. See'
+        ' https://docs.jax.dev/en/latest/export/export.html#compatibility-guarantees-for-custom-calls.'
+    ),
+)
+
 jax_platforms = optional_string_state(
     name='jax_platforms',
     default=None,
@@ -2142,7 +2151,6 @@ optional_enum_state(
     update_global_hook=lambda logging_level: \
       logging_config.update_logging_level_global(logging_level=logging_level)
 )
-
 
 
 use_shardy_partitioner = bool_state(

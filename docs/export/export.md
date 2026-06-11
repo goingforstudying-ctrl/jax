@@ -211,6 +211,9 @@ ValueError: Cannot serialize code with custom calls whose targets have no compat
 
 ```
 
+Alternatively the custom call safety check can be blanket disabled with
+`--jax_export_ignore_custom_call_safety_checks=true`.
+
 See {ref}`export_ensuring_compat` for developer information regarding
 ensuring compatibility.
 

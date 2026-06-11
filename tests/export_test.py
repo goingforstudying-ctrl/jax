@@ -617,11 +617,17 @@ class JaxExportTest(jtu.JaxTestCase):
       )(a)
 
     # Now try again with the safety check disabled
-    exp = get_exported(
+    exp_explicit = get_exported(
       jax.jit(lambda a: a + test_primitive.bind(a)),
       disabled_checks=[export.DisabledSafetyCheck.custom_call("disallowed_call_target")]
     )(a)
-    self.assertIn("disallowed_call_target", exp.mlir_module())
+    self.assertIn("disallowed_call_target", exp_explicit.mlir_module())
+
+    with config.export_ignore_custom_call_safety_checks(True):
+      exp_global = get_exported(
+        jax.jit(lambda a: a + test_primitive.bind(a))
+      )(a)
+      self.assertIn("disallowed_call_target", exp_global.mlir_module())
 
   def test_lowering_parameters_for_export(self):
     # Test that we propagate properly the LoweringParameters.for_export
