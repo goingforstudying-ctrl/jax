@@ -1237,7 +1237,9 @@ log_compiles = bool_state(
     help=('Log a message each time `jit` or `pmap` compiles an XLA '
           'computation. Logging is performed with `logging`. When this '
           'option is set, the log level is WARNING; otherwise the level is '
-          'DEBUG.'))
+          'DEBUG.\n\n'
+          'See https://docs.jax.dev/en/latest/debugging/slow_tracing_compilation.html'
+          ' for more details.'))
 
 explain_cache_misses = bool_state(
     name='jax_explain_cache_misses',
@@ -1245,7 +1247,9 @@ explain_cache_misses = bool_state(
     help=('Each time there is a miss on one of the main caches (e.g. the '
           'tracing cache), log an explanation. Logging is performed with '
           '`logging`. When this option is set, the log level is WARNING; '
-          'otherwise the level is DEBUG.'))
+          'otherwise the level is DEBUG.\n\n'
+          'See https://docs.jax.dev/en/latest/debugging/slow_tracing_compilation.html'
+          ' for more details.'))
 
 log_checkpoint_residuals = bool_state(
     name='jax_log_checkpoint_residuals',
