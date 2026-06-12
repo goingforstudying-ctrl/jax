@@ -3189,6 +3189,7 @@ def _inline_mgpu_flat_transformed_args(
         transform_avals,
         transforms,
         handle_transposes=is_wg_semantics,
+        allow_peer_refs=True,
     )
 
     if is_wg_semantics:
@@ -4673,7 +4674,12 @@ def _atomic_store_lowering_rule(
   value = lowering._ensure_fa(value, value_aval.dtype)
   assert isinstance(ref_aval, state_types.AbstractRef)
   ref, _, remaining_transforms = lowering._handle_transforms(
-      ctx, ref_aval, ref, list(transforms_avals), list(transforms)
+      ctx,
+      ref_aval,
+      ref,
+      list(transforms_avals),
+      list(transforms),
+      allow_peer_refs=True,
   )
   match remaining_transforms:
     case (
